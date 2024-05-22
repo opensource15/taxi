@@ -1,0 +1,24 @@
+<div>
+    <p>접속자 : {{ username }}</p>
+    <p>접속자 id : {{ id }}</p>
+
+    <h1>채팅방 목록</h1>
+    <table border="1px">
+        <tr>
+            <th>번호</th>
+            <th>제목</th>
+            <th>방장</th>
+            <th>생성일</th>
+        </tr>
+        {% for chat_room in chat_rooms %}
+        <tr>
+            <td>{{ chat_room.id }}</td>
+            <td><a href={% url 'chat_view' chat_room.id %}>{{ chat_room.name }}</a></td>
+            <td>{{ chat_room.manager.username }}</td>
+            <td>{{ chat_room.created_at }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <a href={% url 'chat_create_form' %}>채팅방 생성</button>
+</div>

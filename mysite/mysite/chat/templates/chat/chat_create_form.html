@@ -1,0 +1,19 @@
+<!-- chat_create.html -->
+
+채팅방 생성
+
+<div>
+    <form method="post" action="{% url 'chat_create' %}">
+        {% csrf_token %}
+        <input type="text" id="chat-create-name" name="name" placeholder="채팅방 이름" required>
+        <button type="submit" id="chat-create-submit" >생성</button>
+    </form>
+    <script>
+        document.querySelector('#chat-create-name').focus();
+        document.querySelector('#chat-create-name').onkeyup = function(e) {
+            if (e.keyCode === 13) {  // enter, return
+                document.querySelector('#chat-create-submit').click();
+            }
+        };
+    </script>
+</div>
