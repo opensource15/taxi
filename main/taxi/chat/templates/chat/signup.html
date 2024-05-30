@@ -1,20 +1,120 @@
-<!-- templates/chat/signup.html -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <title>회원가입</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
+        }
+        .register-container {
+            width: 90%;
+            max-width: 400px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            background-color: #fff;
+        }
+        .register-container h2 {
+            text-align: left;
+            color: #007bff; /* 연한 파란색 */
+            font-size: 22px; /* Increased font size */
+            font-weight: 300; /* Lighter font weight */
+            margin-bottom: 20px;
+        }
+        .register-container h2 span {
+            display: block;
+        }
+        .register-container form {
+            display: flex;
+            flex-direction: column;
+        }
+        .register-container form div {
+            margin-bottom: 15px;
+        }
+        .register-container form label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .register-container form input, 
+        .register-container form select, 
+        .register-container form button {
+            width: calc(100% - 20px); /* Width adjusted for padding */
+            padding: 10px;
+            margin: 0 auto; /* Center horizontally */
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .register-container form button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .register-container form button:hover {
+            background-color: #0056b3;
+        }
+        .register-container form .terms {
+            display: flex;
+            align-items: center;
+        }
+        .register-container form .terms input {
+            width: auto;
+            margin-right: 10px;
+        }
+    </style>
 </head>
 <body>
-    <h2>회원가입을 위해 정보를 입력해 주세요</h2>
-    <form method="POST" enctype="multipart/form-data">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <div>
-            <label for="file">본인 인증을 위해 학생증 사진 첨부 필수:</label>
-            <input type="file" name="file" id="file">
-        </div>
-        <button type="submit">가입하기</button>
-    </form>
+    <div class="register-container">
+        <h2>
+            <span>회원가입을 위해</span>
+            <span>정보를 입력해 주세요</span>
+        </h2>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+            <div>
+                <label for="id_student_id">아이디:</label>
+                {{ form.student_id }}
+            </div>
+            <div>
+                <label for="id_name">이름:</label>
+                {{ form.name }}
+            </div>
+            <div>
+                <label for="id_phone_number">전화번호:</label>
+                {{ form.phone_number }}
+            </div>
+            <div>
+                <label for="id_gender">성별:</label>
+                {{ form.gender }}
+            </div>
+            <div>
+                <label for="id_password1">비밀번호:</label>
+                {{ form.password1 }}
+            </div>
+            <div>
+                <label for="id_password2">비밀번호 확인:</label>
+                {{ form.password2 }}
+            </div>
+            <div>
+                <label for="file">본인 인증을 위해 학생증 사진 첨부 필수:</label>
+                <input type="file" name="file" id="file" required>
+            </div>
+            <div class="terms">
+                <input type="checkbox" name="agree" required>
+                <label for="agree">이용약관 개인정보 수집 및 정보이용에 동의합니다.</label>
+            </div>
+            <button type="submit">가입하기</button>
+        </form>
+    </div>
 </body>
 </html>

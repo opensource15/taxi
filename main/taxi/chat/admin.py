@@ -21,4 +21,5 @@ class CustomUserAdmin(UserAdmin):
     search_fields = ('student_id', 'name')
     ordering = ('student_id',)
 
+
 admin.site.register(CustomUser, CustomUserAdmin)
