@@ -21,8 +21,9 @@ from django.urls import path, include
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
+    path('chat/', include('chat.urls')),
     path('admin/', admin.site.urls),
-    path('', include('chat.urls')),  # chat 앱의 URL 추가
+    path('', include(('chat.urls', 'chat'), namespace='chat')),
 ]
 
 if settings.DEBUG:

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>채팅방</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        header {
+            background-color: white;
+            padding: 10px 20px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: center;  /* 가운데 정렬 */
+            align-items: center;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 24px;  /* 크기 키우기 */
+            text-align: center;
+        }
+        header span {
+            font-size: 14px;
+            color: #888;
+            margin-left: 10px;  /* 제목과 간격 추가 */
+        }
+        .chat-log {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: #fff;
+        }
+        .chat-message {
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+            max-width: 70%;
+        }
+        .chat-message .user {
+            font-weight: bold;
+        }
+        .chat-message .message {
+            padding: 10px;
+            border-radius: 10px;
+            background-color: #f1f1f1;
+            margin-top: 5px;
+            position: relative;
+        }
+        .chat-message .timestamp {
+            font-size: 12px;
+            color: #888;
+            text-align: right;
+            margin-top: 5px;
+        }
+        .chat-message.left {
+            align-self: flex-start;
+        }
+        .chat-message.left .message {
+            background-color: #f1f1f1;
+        }
+        .chat-message.right {
+            align-self: flex-end;
+            margin-left: auto;
+        }
+        .chat-message.right .message {
+            background-color: #007bff;
+            color: white;
+        }
+        .message-input-container {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-top: 1px solid #ddd;
+            background-color: white;
+        }
+        .message-input-container textarea {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            resize: none;
+            height: 50px;
+        }
+        .message-input-container button {
+            padding: 10px 20px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        .message-input-container button:hover {
+            background-color: #0056b3;
+        }
+        .footer-icons {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background-color: white;
+            border-top: 1px solid #ddd;
+        }
+        .icon-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 24px;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            const chatId = "{{ chatroom.id }}";
+            const currentUser = "{{ request.user.name }}";  // 현재 로그인한 사용자 이름
+
+            function formatDateTime(dateTime) {
+                const now = new Date();
+                const messageDate = new Date(dateTime);
+                const isToday = now.toDateString() === messageDate.toDateString();
+
+                const options = {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                };
+
+                if (!isToday) {
+                    options.year = 'numeric';
+                    options.month = '2-digit';
+                    options.day = '2-digit';
+                }
+
+                return messageDate.toLocaleDateString('ko-KR', options);
+            }
+
+            function appendMessage(name, message, timestamp, isCurrentUser) {
+                const messageElement = $('<div class="chat-message">');
+                messageElement.addClass(isCurrentUser ? 'right' : 'left');
+
+                const userElement = $('<div class="user">').text(name);
+                const messageContentElement = $('<div class="message">').text(message);
+                const timestampElement = $('<div class="timestamp">').text(formatDateTime(timestamp));
+
+                messageElement.append(userElement);
+                messageElement.append(messageContentElement);
+                messageElement.append(timestampElement);
+
+                $('#chat-log').append(messageElement);
+                $('#chat-log').scrollTop($('#chat-log')[0].scrollHeight);
+            }
+
+            function loadMessages() {
+                $.ajax({
+                    url: `/chat/api/messages/${chatId}/`,
+                    method: 'GET',
+                    success: function(data) {
+                        console.log('Messages:', data.messages);
+                        $('#chat-log').empty();
+                        data.messages.forEach(function(message) {
+                            appendMessage(message.name, message.message, message.timestamp, message.student_id === "{{ request.user.student_id }}");
+                        });
+                    },
+                    error: function(error) {
+                        console.error('Failed to load messages:', error);
+                    }
+                });
+            }
+
+            $('#chat-message-submit').click(function() {
+                const messageInput = $('#chat-message-input');
+                const message = messageInput.val();
+
+                if (message.trim() !== '') {
+                    $.ajax({
+                        url: `/chat/api/messages/${chatId}/`,
+                        method: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({
+                            message: message
+                        }),
+                        headers: {
+                            'X-CSRFToken': '{{ csrf_token }}'  // CSRF 토큰 설정
+                        },
+                        success: function(data) {
+                            appendMessage(currentUser, message, data.timestamp, true);
+                            messageInput.val('');
+                        },
+                        error: function(error) {
+                            console.error('Failed to send message:', error);
+                        }
+                    });
+                }
+            });
+
+            $('#chat-message-input').keypress(function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    $('#chat-message-submit').click();
+                }
+            });
+
+            loadMessages();
+            setInterval(loadMessages, 500);  // 0.5초마다 메시지 로드
+        });
+    </script>
+</head>
+<body>
+    <div class="chat-container">
+        <header>
+            <h1>{{ chatroom.origin }} <span>{{ chatroom.members.count }}/{{ chatroom.max_members }}</span></h1>
+        </header>
+        
+        <div class="chat-log" id="chat-log">
+            {% for message in chatroom.messages.all %}
+                <div class="chat-message {% if message.student_id == request.user.student_id %}right{% else %}left{% endif %}">
+                    <div class="user">{{ message.name }}</div>
+                    <div class="message">{{ message.message }}</div>
+                    <div class="timestamp">{{ message.timestamp }}</div>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <div class="message-input-container">
+            <textarea id="chat-message-input" placeholder="메시지를 입력하세요"></textarea>
+            <button id="chat-message-submit">전송</button>
+        </div>
+
+        <div class="footer-icons">
+            <button class="icon-btn">+</button>
+            <button class="icon-btn">📍</button>
+        </div>
+    </div>
+</body>
+</html>

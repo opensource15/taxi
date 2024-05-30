@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>새로운 택시팟 개설</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f7f7f7;
+        }
+        .form-container {
+            width: 90%;
+            max-width: 500px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .form-container h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .form-container form {
+            display: flex;
+            flex-direction: column;
+        }
+        .form-container form label {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-container form input,
+        .form-container form select,
+        .form-container form button {
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .form-container form button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        .form-container form button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1>새로운 택시팟 개설</h1>
+        <form method="post">
+            {% csrf_token %}
+            <label for="origin">모이는 곳</label>
+            <input type="text" id="origin" name="origin" required>
+
+            <label for="destination">목적지</label>
+            <input type="text" id="destination" name="destination" required>
+
+            <label for="date">모이는 날짜</label>
+            <input type="date" id="date" name="date" value="{{ today|date:'Y-m-d' }}" required>
+
+            <label for="time">모이는 시간</label>
+            <input type="time" id="time" name="time">
+
+            <button type="submit">채팅방 개설</button>
+        </form>
+    </div>
+</body>
+</html>

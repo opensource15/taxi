@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import CustomUser
+from .models import CustomUser , ChatRoom
+from .models import ChatRoom, ChatMessage
 
 class CustomUserAdmin(UserAdmin):
     model = CustomUser
@@ -21,5 +22,24 @@ class CustomUserAdmin(UserAdmin):
     search_fields = ('student_id', 'name')
     ordering = ('student_id',)
 
+@admin.register(ChatRoom)
+class ChatRoomAdmin(admin.ModelAdmin):
+    list_display = ('origin', 'destination', 'departure_time', 'owner', 'created_at')
+    search_fields = ('origin', 'destination', 'owner__username')
+    list_filter = ('origin', 'destination', 'departure_time', 'created_at')
+
+@admin.register(ChatMessage)
+class ChatMessageAdmin(admin.ModelAdmin):
+    list_display = ('user', 'room', 'message', 'timestamp')
+    search_fields = ('user__name', 'message', 'room__origin', 'room__destination')
+
+    def user_name(self, obj):
+        return obj.user.name
+
+    def room_info(self, obj):
+        return f'{obj.room.origin} to {obj.room.destination}'
+
+    user_name.short_description = 'User Name'
+    room_info.short_description = 'Room Info'
 
 admin.site.register(CustomUser, CustomUserAdmin)

@@ -1,5 +1,7 @@
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
+from django.conf import settings
+from django.utils import timezone
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, student_id, password=None, **extra_fields):
@@ -29,6 +31,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_verified = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
+    date_joined = models.DateTimeField(default=timezone.now)  # 새 필드 추가
 
     objects = CustomUserManager()
 
@@ -37,3 +40,31 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.student_id
+
+class ChatRoom(models.Model):
+    origin = models.CharField(max_length=255)  # 출발지
+    destination = models.CharField(max_length=255)  # 도착지
+    departure_time = models.DateTimeField()  # 출발시간
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='owned_rooms', on_delete=models.CASCADE)
+    members = models.ManyToManyField(settings.AUTH_USER_MODEL, through='ChatRoomMembership', related_name='chat_rooms')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.origin} to {self.destination} at {self.departure_time}'
+
+class ChatRoomMembership(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    room = models.ForeignKey(ChatRoom, on_delete=models.CASCADE)
+    joined_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.user.name} in {self.room.origin} to {self.room.destination}'
+
+class ChatMessage(models.Model):
+    room = models.ForeignKey(ChatRoom, related_name='messages', on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    message = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.user.username}: {self.message[:20]}'

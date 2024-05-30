@@ -134,3 +134,9 @@ FILE_UPLOAD_HANDLERS = [
     'django.core.files.uploadhandler.MemoryFileUploadHandler',
     'django.core.files.uploadhandler.TemporaryFileUploadHandler',
 ]
+
+LOGIN_URL = '/login/'  # 로그인 페이지 URL
+LOGIN_REDIRECT_URL = '/'  # 로그인 성공 후 리디렉션될 URL
+LOGOUT_REDIRECT_URL = '/login/'  # 로그아웃 후 리디렉션될 URL
+
+TIME_ZONE = 'Asia/Seoul'

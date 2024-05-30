@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatroom List</title>
+    <style>
+        *{
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+padding: 0;
+box-sizing: border-box;
+}
+.container {
+width: 90%;
+max-width: 1200px;
+margin: 0 auto;
+padding: 20px;
+}
+h1, h2 {
+text-align: center;
+}
+.search-bar {
+display: flex;
+justify-content: center;
+margin-bottom: 20px;
+}
+.search-bar input {
+width: 70%;
+padding: 10px;
+font-size: 16px;
+border: 1px solid #ccc;
+border-radius: 4px 0 0 4px;
+box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.search-bar button {
+padding: 10px 20px;
+font-size: 16px;
+border: 1px solid #ccc;
+border-left: none;
+border-radius: 0 4px 4px 0;
+background-color: #007BFF;
+color: #fff;
+cursor: pointer;
+box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.chatroom-list {
+list-style: none;
+padding: 0;
+}
+.chatroom-item {
+display: flex;
+flex-direction: column;
+border: 1px solid #ccc;
+border-radius: 8px;
+margin-bottom: 20px;
+padding: 10px;
+box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.chatroom-info {
+margin-bottom: 10px;
+}
+.line {
+display: flex;
+justify-content: space-between;
+}
+.chatroom-action {
+text-align: center;
+}
+.chatroom-action a {
+padding: 10px 20px;
+text-decoration: none;
+background-color: #28a745;
+color: #fff;
+border-radius: 4px;
+box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+display: inline-block;
+}
+@media (max-width: 768px) {
+.search-bar input {
+    width: 60%;
+}
+.line {
+    flex-direction: column;
+    text-align: center;
+}
+.line p {
+    margin: 5px 0;
+}
+}
+@media (max-width: 480px) {
+.search-bar {
+    flex-direction: column;
+}
+.search-bar input {
+    width: 100%;
+    margin-bottom: 10px;
+    border-radius: 4px;
+}
+.search-bar button {
+    width: 100%;
+    border-radius: 4px;
+    border-left: 1px solid #ccc;
+}
+}
+.floating-button {
+position: fixed;
+bottom: 20px;
+right: 20px;
+background-color: #28a745;
+color: white;
+padding: 15px 20px;
+border-radius: 4px;
+text-align: center;
+box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+cursor: pointer;
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>채팅방 목록</h1>
+<div class="search-bar">
+<form method="GET" action="{% url 'chat:home' %}">
+    <input type="text" name="destination" placeholder="어디로 갈까요?">
+    <button type="submit">검색</button>
+</form>
+</div>
+<h3>{{ search_result }}</h3>
+{% if chatrooms %}
+<ul class="chatroom-list">
+    {% for chatroom in chatrooms %}
+        <li class="chatroom-item">
+            <div class="chatroom-info">
+                <div class="line">
+                    <p><strong>출발지:</strong> {{ chatroom.origin }}</p>
+                    <p><strong>목적지:</strong> {{ chatroom.destination }}</p>
+                </div>
+                <div class="line">
+                    <p><strong>출발 시간:</strong> 
+                        <span class="departure-time" data-departure-time="{{ chatroom.departure_time|date:'c' }}"></span>
+                    </p>
+                    <p><strong>인원수:</strong> {{ chatroom.members.count }}</p>
+                </div>
+            </div>
+            <div class="chatroom-action">
+                <a href="{% url 'chat:chatroom_detail' chatroom.id %}">참여</a>
+            </div>
+        </li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>개설된 채팅방이 없습니다</p>
+{% endif %}
+</div>
+
+<div class="floating-button"><a href="{% url 'chat:newroom' %}">개설</a></div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+const departureElements = document.querySelectorAll('.departure-time');
+const today = new Date();
+const tomorrow = new Date();
+tomorrow.setDate(today.getDate() + 1);
+
+departureElements.forEach(function(element) {
+    const departureTime = new Date(element.getAttribute('data-departure-time'));
+    const formattedTime = formatDepartureTime(departureTime, today, tomorrow);
+    element.textContent = formattedTime;
+});
+
+function formatDepartureTime(departureTime, today, tomorrow) {
+    const hours = String(departureTime.getHours()).padStart(2, '0');
+    const minutes = String(departureTime.getMinutes()).padStart(2, '0');
+
+    if (isSameDay(departureTime, today)) {
+        return `${hours} : ${minutes}`;
+    } else if (isSameDay(departureTime, tomorrow)) {
+        return `내일 ${hours} : ${minutes}`;
+    } else {
+        const month = String(departureTime.getMonth() + 1).padStart(2, '0');
+        const date = String(departureTime.getDate()).padStart(2, '0');
+        return `${month}월 ${date}일 ${hours} : ${minutes}`;
+    }
+}
+
+function isSameDay(date1, date2) {
+    return date1.getFullYear() === date2.getFullYear() &&
+        date1.getMonth() === date2.getMonth() &&
+        date1.getDate() === date2.getDate();
+}
+});
+</script>
+</body>
+</html>
