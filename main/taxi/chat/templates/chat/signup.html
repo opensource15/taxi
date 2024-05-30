@@ -104,6 +104,9 @@
             <div>
                 <label for="id_password2">비밀번호 확인:</label>
                 {{ form.password2 }}
+                {% for error in form.password2.errors %}
+                    <span class="error">{{ error }}</span>
+                {% endfor %}
             </div>
             <div>
                 <label for="file">본인 인증을 위해 학생증 사진 첨부 필수:</label>
