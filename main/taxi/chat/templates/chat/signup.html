@@ -1,0 +1,20 @@
+<!-- templates/chat/signup.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>회원가입</title>
+</head>
+<body>
+    <h2>회원가입을 위해 정보를 입력해 주세요</h2>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div>
+            <label for="file">본인 인증을 위해 학생증 사진 첨부 필수:</label>
+            <input type="file" name="file" id="file">
+        </div>
+        <button type="submit">가입하기</button>
+    </form>
+</body>
+</html>
