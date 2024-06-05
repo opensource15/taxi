@@ -8,5 +8,6 @@ urlpatterns = [
     path('newroom/', views.newroom, name='newroom'),
     path('', views.home, name='home'),  # 홈 페이지 또는 기본 경로 추가
     path('chatrooms/<int:room_id>/', views.chatroom_detail, name='chatroom_detail'),
+    path('logout', views.logout_view, name='logout'),
     path('api/messages/<int:room_id>/', views.chat_messages, name='chat_messages'),  # API 엔드포인트 추가
 ]

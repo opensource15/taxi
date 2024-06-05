@@ -2,7 +2,9 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>회원가입</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
     <style>
         body {
             display: flex;
@@ -10,11 +12,12 @@
             align-items: center;
             min-height: 100vh;
             margin: 0;
-            font-family: Arial, sans-serif;
+            font-family: 'Roboto', Arial, sans-serif;
             background-color: #f7f7f7;
+            padding: 20px; /* Added padding for better mobile view */
         }
         .register-container {
-            width: 90%;
+            width: 100%;
             max-width: 400px;
             padding: 20px;
             border: 1px solid #ccc;
@@ -26,7 +29,7 @@
             text-align: left;
             color: #007bff; /* 연한 파란색 */
             font-size: 22px; /* Increased font size */
-            font-weight: 300; /* Lighter font weight */
+            font-weight: 500; /* Lighter font weight */
             margin-bottom: 20px;
         }
         .register-container h2 span {
@@ -47,11 +50,11 @@
         .register-container form input, 
         .register-container form select, 
         .register-container form button {
-            width: calc(100% - 20px); /* Width adjusted for padding */
+            width: 100%; /* Width adjusted for better responsiveness */
             padding: 10px;
-            margin: 0 auto; /* Center horizontally */
             border: 1px solid #ccc;
             border-radius: 5px;
+            box-sizing: border-box; /* Ensure padding and border are included in the element's total width and height */
         }
         .register-container form button {
             background-color: #007bff;
@@ -69,6 +72,29 @@
         .register-container form .terms input {
             width: auto;
             margin-right: 10px;
+        }
+        @media (max-width: 480px) {
+            .register-container {
+                padding: 15px;
+                box-shadow: none;
+                border: none;
+            }
+            .register-container h2 {
+                font-size: 20px;
+                margin-bottom: 15px;
+            }
+            .register-container form input,
+            .register-container form select,
+            .register-container form button {
+                padding: 8px;
+            }
+            .register-container form label {
+                font-size: 14px;
+            }
+            .register-container form button {
+                padding: 10px;
+                font-size: 16px;
+            }
         }
     </style>
 </head>
@@ -88,6 +114,10 @@
             <div>
                 <label for="id_name">이름:</label>
                 {{ form.name }}
+            </div>
+            <div>
+                <label for="id_nickname">별명:</label>
+                {{ form.nickname }}
             </div>
             <div>
                 <label for="id_phone_number">전화번호:</label>

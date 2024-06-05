@@ -126,7 +126,7 @@ def chat_messages(request, room_id):
     if request.method == 'GET':
         messages = chatroom.messages.all().order_by('timestamp')
         message_list = [{
-            'name': message.user.name,
+            'nickname': message.user.nickname,
             'student_id' : message.user.student_id,
             'message': message.message,
             'timestamp': message.timestamp.isoformat()  # ISO 포맷으로 전송
@@ -148,8 +148,12 @@ def chat_messages(request, room_id):
             message=message_text
         )
         return JsonResponse({
-            'name': message.user.name,
+            'nickname': message.user.nickname,
             'student_id' : message.user.student_id,
             'message': message.message,
             'timestamp': message.timestamp.isoformat()  # ISO 포맷으로 전송
         })
+    
+def logout_view(request):
+    logout(request)
+    return redirect('home')

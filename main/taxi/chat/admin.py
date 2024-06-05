@@ -5,18 +5,18 @@ from .models import ChatRoom, ChatMessage
 
 class CustomUserAdmin(UserAdmin):
     model = CustomUser
-    list_display = ('student_id', 'name', 'phone_number', 'gender', 'is_verified', 'is_staff')
+    list_display = ('student_id', 'name', 'phone_number', 'gender', 'is_verified', 'is_staff','nickname')
     list_filter = ('is_staff', 'is_superuser', 'is_active', 'is_verified')
     fieldsets = (
         (None, {'fields': ('student_id', 'password')}),
-        ('Personal info', {'fields': ('name', 'phone_number', 'gender')}),
+        ('Personal info', {'fields': ('name', 'phone_number','nickname', 'gender')}),
         ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'is_verified', 'groups', 'user_permissions')}),
         ('Important dates', {'fields': ('last_login', 'date_joined')}),
     )
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('student_id', 'name', 'phone_number', 'gender', 'password1', 'password2', 'is_active', 'is_staff', 'is_verified')}
+            'fields': ('student_id', 'name','nickname', 'phone_number', 'gender', 'password1', 'password2', 'is_active', 'is_staff', 'is_verified')}
         ),
     )
     search_fields = ('student_id', 'name')

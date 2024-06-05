@@ -21,4 +21,4 @@ class CustomUserCreationForm(UserCreationForm):
 
     class Meta(UserCreationForm.Meta):
         model = CustomUser
-        fields = ('student_id', 'name', 'phone_number', 'gender', 'password1', 'password2')
+        fields = ('student_id', 'name', 'nickname', 'phone_number', 'gender', 'password1', 'password2')

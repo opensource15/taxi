@@ -26,6 +26,7 @@ class CustomUserManager(BaseUserManager):
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     student_id = models.CharField(max_length=20, unique=True)
     name = models.CharField(max_length=30)
+    nickname = models.CharField(max_length=30)
     phone_number = models.CharField(max_length=15)
     gender = models.CharField(max_length=10)
     is_verified = models.BooleanField(default=False)
