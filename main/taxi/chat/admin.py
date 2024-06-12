@@ -24,8 +24,8 @@ class CustomUserAdmin(UserAdmin):
 
 @admin.register(ChatRoom)
 class ChatRoomAdmin(admin.ModelAdmin):
-    list_display = ('origin', 'destination', 'departure_time', 'owner', 'created_at')
-    search_fields = ('origin', 'destination', 'owner__username')
+    list_display = ('origin', 'destination', 'departure_time', 'owner', 'created_at', 'charge')
+    search_fields = ('origin', 'destination', 'owner__username', 'charge')
     list_filter = ('origin', 'destination', 'departure_time', 'created_at')
 
 @admin.register(ChatMessage)

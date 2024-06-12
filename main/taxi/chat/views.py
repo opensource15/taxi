@@ -157,3 +157,13 @@ def chat_messages(request, room_id):
 def logout_view(request):
     logout(request)
     return redirect('home')
+
+@csrf_exempt
+def update_charge(request, room_id):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        charge = data.get('charge')
+        chatroom = get_object_or_404(ChatRoom, id=room_id)
+        chatroom.charge = charge
+        chatroom.save()
+        return JsonResponse({'status': 'success'})

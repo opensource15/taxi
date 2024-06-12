@@ -49,6 +49,7 @@ class ChatRoom(models.Model):
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='owned_rooms', on_delete=models.CASCADE)
     members = models.ManyToManyField(settings.AUTH_USER_MODEL, through='ChatRoomMembership', related_name='chat_rooms')
     created_at = models.DateTimeField(auto_now_add=True)
+    charge = models.IntegerField(default=0)
 
     def __str__(self):
         return f'{self.origin} to {self.destination} at {self.departure_time}'

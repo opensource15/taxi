@@ -10,4 +10,5 @@ urlpatterns = [
     path('chatrooms/<int:room_id>/', views.chatroom_detail, name='chatroom_detail'),
     path('logout', views.logout_view, name='logout'),
     path('api/messages/<int:room_id>/', views.chat_messages, name='chat_messages'),  # API 엔드포인트 추가
+    path('update_charge/<int:room_id>/', views.update_charge, name='update_charge'),
 ]

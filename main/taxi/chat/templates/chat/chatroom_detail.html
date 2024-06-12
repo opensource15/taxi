@@ -21,18 +21,18 @@
             padding: 10px 20px;
             border-bottom: 1px solid #ddd;
             display: flex;
-            justify-content: center;  /* 가운데 정렬 */
+            justify-content: center;
             align-items: center;
         }
         header h1 {
             margin: 0;
-            font-size: 24px;  /* 크기 키우기 */
+            font-size: 24px;
             text-align: center;
         }
         header span {
             font-size: 14px;
             color: #888;
-            margin-left: 10px;  /* 제목과 간격 추가 */
+            margin-left: 10px;
         }
         .chat-log {
             flex: 1;
@@ -111,6 +111,7 @@
             padding: 10px;
             background-color: white;
             border-top: 1px solid #ddd;
+            position: relative;
         }
         .icon-btn {
             background: none;
@@ -118,12 +119,76 @@
             cursor: pointer;
             font-size: 24px;
         }
+        .popup-menu {
+            display: none;
+            position: absolute;
+            bottom: 60px;
+            left: 20px;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 20px;
+            z-index: 1000;
+        }
+        .popup-menu a {
+            display: block;
+            padding: 15px;
+            text-decoration: none;
+            color: #007bff;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        .popup-menu a:hover {
+            background-color: #f1f1f1;
+        }
+        .purchase-popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            z-index: 1001;
+        }
+        .purchase-popup h1 {
+            margin: 0;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        .purchase-popup div {
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        .purchase-popup input {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: calc(100% - 22px);
+        }
+        .purchase-popup button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .purchase-popup button:hover {
+            background-color: #0056b3;
+        }
     </style>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function() {
             const chatId = "{{ chatroom.id }}";
-            const currentUser = "{{ request.user.nickname }}";  // 현재 로그인한 사용자 이름
+            const currentUser = "{{ request.user.nickname }}";
 
             function formatDateTime(dateTime) {
                 const now = new Date();
@@ -165,7 +230,6 @@
                     url: `/chat/api/messages/${chatId}/`,
                     method: 'GET',
                     success: function(data) {
-                        console.log('Messages:', data.messages);
                         $('#chat-log').empty();
                         data.messages.forEach(function(message) {
                             appendMessage(message.nickname, message.message, message.timestamp, message.student_id === "{{ request.user.student_id }}");
@@ -190,7 +254,7 @@
                             message: message
                         }),
                         headers: {
-                            'X-CSRFToken': '{{ csrf_token }}'  // CSRF 토큰 설정
+                            'X-CSRFToken': '{{ csrf_token }}'
                         },
                         success: function(data) {
                             appendMessage(currentUser, message, data.timestamp, true);
@@ -210,8 +274,41 @@
                 }
             });
 
+            $('#menu-btn').click(function() {
+                $('#popup-menu').toggle();
+            });
+
+            $('#popup-menu a').click(function() {
+                $('#popup-menu').hide();
+                $('#purchase-popup').show();
+            });
+
+            $('#purchase-submit').click(function() {
+                const charge = $('#purchase-input').val();
+                if (charge.trim() !== '') {
+                    $.ajax({
+                        url: `/chat/update_charge/${chatId}/`,
+                        method: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({
+                            charge: charge
+                        }),
+                        headers: {
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        },
+                        success: function(data) {
+                            alert('정산이 완료되었습니다.');
+                            $('#purchase-popup').hide();
+                        },
+                        error: function(error) {
+                            console.error('Failed to update charge:', error);
+                        }
+                    });
+                }
+            });
+
             loadMessages();
-            setInterval(loadMessages, 500);  // 0.5초마다 메시지 로드
+            setInterval(loadMessages, 500);
         });
     </script>
 </head>
@@ -220,7 +317,12 @@
         <header>
             <h1>{{ chatroom.origin }} <span>{{ chatroom.members.count }}/4</span></h1>
         </header>
-        
+
+        <div class="purchase">
+            <h3>정산해요</h3>
+            <div>총 주행요금 : {{ chatroom.charge }}원</div>
+        </div>
+
         <div class="chat-log" id="chat-log">
             {% for message in chatroom.messages.all %}
                 <div class="chat-message {% if message.student_id == request.user.student_id %}right{% else %}left{% endif %}">
@@ -237,8 +339,21 @@
         </div>
 
         <div class="footer-icons">
-            <button class="icon-btn">+</button>
+            <button id="menu-btn" class="icon-btn">+</button>
             <button class="icon-btn">📍</button>
+        </div>
+
+        <!-- 팝업 메뉴 -->
+        <div id="popup-menu" class="popup-menu">
+            <a href="#">정산하기</a>
+        </div>
+
+        <!-- 정산 입력 팝업 -->
+        <div id="purchase-popup" class="purchase-popup">
+            <h1>정산해요</h1>
+            <div>총 주행요금 :</div>
+            <input id="purchase-input" type="number" min="0" step="100">
+            <button id="purchase-submit">정산하기</button>
         </div>
     </div>
 </body>
