@@ -10,9 +10,14 @@ from django.contrib.auth.views import LoginView
 from django.views.decorators.http import require_http_methods
 import json
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib import messages
 
 class CustomLoginView(LoginView):
     template_name = 'chat/login.html'
+
+    def form_invalid(self, form):
+        messages.error(self.request, '학번 또는 비밀번호가 잘못되었습니다.')
+        return super().form_invalid(form)
 
 
 

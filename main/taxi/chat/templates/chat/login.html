@@ -38,6 +38,10 @@
         .links {
             margin-top: 10px;
         }
+        .error-message {
+            color: red;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -52,6 +56,13 @@
         <div class="links">
             <a href="{% url 'chat:signup' %}">회원가입</a>
         </div>
+        {% if messages %}
+            <div class="error-message">
+                {% for message in messages %}
+                    <p>{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
     </div>
 </body>
 </html>
