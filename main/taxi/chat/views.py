@@ -172,3 +172,7 @@ def update_charge(request, room_id):
         chatroom.charge = charge
         chatroom.save()
         return JsonResponse({'status': 'success'})
+
+def get_charge(request, room_id):
+    chatroom = get_object_or_404(ChatRoom, id=room_id)
+    return JsonResponse({'charge': chatroom.charge})
