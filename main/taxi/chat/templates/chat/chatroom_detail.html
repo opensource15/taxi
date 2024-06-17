@@ -23,6 +23,7 @@
             display: flex;
             justify-content: center;  /* 가운데 정렬 */
             align-items: center;
+            cursor: pointer;
         }
         header h1 {
             margin: 0;
@@ -183,10 +184,72 @@
         .purchase-popup button:hover {
             background-color: #0056b3;
         }
+        .charge-container {
+            background-color: #add8e6;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: left;
+            margin: 20px;
+            display: none; /* 초기 상태는 숨김 */
+        }
+        .charge-header {
+            display: flex;
+            align-items: center;
+            flex-flow: column;
+            justify-content: space-between;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 0px;
+            padding-bottom: 0px;
+        }
+        .charge-header h3 {
+            margin: 10px;
+            font-size: 24px;
+        }
+        .charge-header img {
+            width: 150px;
+            height: 150px;
+        }
         .charge-info {
-            text-align: center;
-            font-size: 20px;
-            margin: 20px 0;
+            background-color: #fff;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 18px;
+            margin-top: 0px;
+        }
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+        .popup-header {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .popup-content {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .popup-close {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .popup-close:hover {
+            background-color: #0056b3;
         }
     </style>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -213,7 +276,8 @@
 
                 return messageDate.toLocaleDateString('ko-KR', options);
             }
-
+            
+            // 메시지 전송 함수
             function appendMessage(name, message, timestamp, isCurrentUser) {
                 const messageElement = $('<div class="chat-message">');
                 messageElement.addClass(isCurrentUser ? 'right' : 'left');
@@ -230,6 +294,7 @@
                 $('#chat-log').scrollTop($('#chat-log')[0].scrollHeight);
             }
 
+            // api로 DB loadMessages를 불러오는 함수
             function loadMessages() {
                 $.ajax({
                     url: `/chat/api/messages/${chatId}/`,
@@ -241,24 +306,40 @@
                         });
                     },
                     error: function(error) {
-                        console.error('Failed to load messages:', error);
+                        console.error('메시지 로드 실패 :', error);
                     }
                 });
             }
-
+            
+            // api로 DB charge를 불러오는 함수
             function loadCharge() {
                 $.ajax({
                     url: `/chat/api/charge/${chatId}/`,
                     method: 'GET',
                     success: function(data) {
-                        $('#charge-info').text(`총 주행요금: ${data.charge}원`);
+                        // 요금을 정산했을 때만 (0이 아닐떄만) 정산
+                        if (data.charge == 0) {
+                            $('#charge-container').hide();
+                        } else {
+                            $('#charge-container').show();
+                            const membersCount = {{ chatroom.members.count }};
+                            const chargePerPerson = data.charge / membersCount;
+
+                            // 동적으로 html 건드리기
+                            $('#charge-info').html(`
+                                <div style='padding:5px'>요청인원: ${membersCount}명</div>
+                                <div style='padding:5px'>택시요금: ${data.charge}원</div>
+                                <div style='padding:5px'>정산액수: ${chargePerPerson.toFixed(0)}원</div>
+                            `);
+                        }
                     },
                     error: function(error) {
-                        console.error('Failed to load charge:', error);
+                        console.error('요금 로드 실패 :', error);
                     }
                 });
             }
 
+            // 클릭 시 chat-message input에서 input 받아서 ajax로 api를 통해 메시지 전송
             $('#chat-message-submit').click(function() {
                 const messageInput = $('#chat-message-input');
                 const message = messageInput.val();
@@ -273,6 +354,7 @@
                         }),
                         headers: {
                             'X-CSRFToken': '{{ csrf_token }}'
+                            
                         },
                         success: function(data) {
                             appendMessage(currentUser, message, data.timestamp, true);
@@ -285,24 +367,29 @@
                 }
             });
 
+            // 키보드 엔터 쳤을 때 보내는 효과. 모바일에서는 필요 없을 것 같습니다
             $('#chat-message-input').keypress(function(e) {
                 if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
                     $('#chat-message-submit').click();
                 }
             });
-
+            
+            // 메뉴 버튼
             $('#menu-btn').click(function() {
                 $('#popup-menu').toggle();
             });
 
+            // 팝업 메뉴
             $('#popup-menu a').click(function() {
                 $('#popup-menu').hide();
                 $('#purchase-popup').show();
             });
 
+            // 정산하기 눌림
             $('#purchase-submit').click(function() {
                 const charge = $('#purchase-input').val();
+                // 요금을 받아와서 ajax로 전송하기
                 if (charge.trim() !== '') {
                     $.ajax({
                         url: `/chat/update_charge/${chatId}/`,
@@ -311,25 +398,51 @@
                         data: JSON.stringify({
                             charge: charge
                         }),
+                        // X-CSRFToken이 필요함 (django에서 보안설정!!)
                         headers: {
                             'X-CSRFToken': '{{ csrf_token }}'
                         },
                         success: function(data) {
                             alert('정산이 완료되었습니다.');
                             $('#purchase-popup').hide();
-                            loadCharge();  // Update charge display immediately
+                            loadCharge();  // 요금 정산하기
                         },
                         error: function(error) {
-                            console.error('Failed to update charge:', error);
+                            console.error('요금 업데이트 실패:', error);
                         }
                     });
                 }
             });
 
+            // 현재 접속중인 사용자 로드
+            function loadMembers() {
+                $.ajax({
+                    url: `/chat/api/members/${chatId}/`,
+                    method: 'GET',
+                    success: function(data) {
+                        const membersList = data.members.map(member => `<div>${member.nickname} (${member.student_id})</div>`).join('');
+                        $('#popup-content').html(membersList);
+                        $('#popup').show();
+                    },
+                    error: function(error) {
+                        console.error('Failed to load members:', error);
+                    }
+                });
+            }
+
+            $('header').click(function() {
+                loadMembers();
+            });
+
+            $('.popup-close').click(function() {
+                $('#popup').hide();
+            });
+
+
             loadMessages();
             setInterval(loadMessages, 500);
             loadCharge();
-            setInterval(loadCharge, 5000);  // Update charge every 5 seconds
+            setInterval(loadCharge, 5000);  // 5초마다 업데이트 =
         });
     </script>
 </head>
@@ -339,7 +452,13 @@
             <h1>{{ chatroom.origin }} <span>{{ chatroom.members.count }}/4</span></h1>
         </header>
 
-        <div class="charge-info" id="charge-info"></div>
+        <div class="charge-container" id="charge-container">
+            <div class="charge-header">
+                <div style="margin-right:auto"><h1 style="margin:0px">우리 정산해요!</h1></div>
+                <div style="margin-left:auto"><img src="/media/loopy.png" alt="Image" width="200%"></div>
+            </div>
+            <div class="charge-info" id="charge-info"></div>
+        </div>
 
         <div class="chat-log" id="chat-log">
             {% for message in chatroom.messages.all %}
@@ -372,6 +491,13 @@
             <div>총 주행요금 :</div>
             <input id="purchase-input" type="number" min="0" step="100">
             <button id="purchase-submit">정산하기</button>
+        </div>
+
+        <!-- 채팅 목록 팝업 -->
+        <div class="popup" id="popup">
+            <div class="popup-header">방 목록</div>
+            <div class="popup-content" id="popup-content"></div>
+            <button class="popup-close">닫기</button>
         </div>
     </div>
 </body>

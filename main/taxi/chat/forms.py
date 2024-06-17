@@ -11,6 +11,7 @@ class CustomUserCreationForm(UserCreationForm):
         ('남성', '남성')
     ]
     gender = forms.ChoiceField(choices=gender_choices, required=True)
+    student_id_file = forms.ImageField(required=False)  # 여기서 필드를 필수로 설정하지 않음
 
     def clean_password2(self):
         password1 = self.cleaned_data.get("password1")
@@ -19,6 +20,17 @@ class CustomUserCreationForm(UserCreationForm):
             raise ValidationError("비밀번호가 일치하지 않습니다.")
         return password2
 
+    def clean(self):
+        cleaned_data = super().clean()
+        student_id_file = cleaned_data.get("student_id_file") # 
+        if not student_id_file:
+            raise ValidationError({'student_id_file': "파일이 유효하지 않습니다."}) # 가끔 파일 경로 이상할 때 발생... 해결법은 모르겠습니다.
+        return cleaned_data
+
     class Meta(UserCreationForm.Meta):
         model = CustomUser
-        fields = ('student_id', 'name', 'nickname', 'phone_number', 'gender', 'password1', 'password2')
+        fields = ('student_id', 'name', 'nickname', 'phone_number', 'gender', 'student_id_file', 'password1', 'password2')
+    
+    def __init__(self, *args, **kwargs):
+        super(CustomUserCreationForm, self).__init__(*args, **kwargs)
+        self.fields['student_id_file'].required = False

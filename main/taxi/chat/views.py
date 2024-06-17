@@ -49,14 +49,14 @@ def signup(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST, request.FILES)
         if form.is_valid():
-            
-            user = form.save()
-            user.is_verified = False  # 새 사용자에 대한 기본 설정
+            user = form.save(commit=False)
+            user.is_verified = False
+            if 'student_id_file' in request.FILES:
+                user.student_id_file = request.FILES['student_id_file']
             user.save()
             login(request, user)
-            return redirect('home')  # 성공 페이지 또는 로그인 페이지로 리디렉션
-        
-        if not form.is_valid():
+            return redirect('home')
+        else:
             print("에러출력")
             print(form.errors)
     else:
@@ -122,12 +122,14 @@ def chatroom_detail(request, room_id):
     }
     return render(request, 'chat/chatroom_detail.html', context)
 
+# 채팅 메시지를 위한 API
 @login_required
 @csrf_exempt
 @require_http_methods(["GET", "POST"])
 def chat_messages(request, room_id):
     chatroom = get_object_or_404(ChatRoom, id=room_id)
 
+    # GET으로 메시지 요청 들어오면 메시지 보내주기 
     if request.method == 'GET':
         messages = chatroom.messages.all().order_by('timestamp')
         message_list = [{
@@ -138,6 +140,7 @@ def chat_messages(request, room_id):
         } for message in messages]
         return JsonResponse({'messages': message_list})
 
+    # POST로 메시지가 들어오면 메시지 보내주기
     elif request.method == 'POST':
         print(request.body)
         data = json.loads(request.body.decode('utf-8'))
@@ -163,6 +166,8 @@ def logout_view(request):
     logout(request)
     return redirect('home')
 
+
+# --- 아래는 AJAX를 위한 기타 API들 ---
 @csrf_exempt
 def update_charge(request, room_id):
     if request.method == 'POST':
@@ -176,3 +181,10 @@ def update_charge(request, room_id):
 def get_charge(request, room_id):
     chatroom = get_object_or_404(ChatRoom, id=room_id)
     return JsonResponse({'charge': chatroom.charge})
+
+@login_required
+def chatroom_members(request, room_id):
+    chatroom = get_object_or_404(ChatRoom, id=room_id)
+    members = chatroom.members.all()
+    members_data = [{'student_id': member.student_id, 'nickname': member.nickname} for member in members]
+    return JsonResponse({'members': members_data})
