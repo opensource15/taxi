@@ -110,22 +110,37 @@
             <div>
                 <label for="id_student_id">학번:</label>
                 {{ form.student_id }}
+                {% for error in form.student_id.errors %}
+                    <span class="error">{{ error }}</span>
+                {% endfor %}
             </div>
             <div>
                 <label for="id_name">이름:</label>
                 {{ form.name }}
+                {% for error in form.name.errors %}
+                    <span class="error">{{ error }}</span>
+                {% endfor %}
             </div>
             <div>
                 <label for="id_nickname">별명:</label>
                 {{ form.nickname }}
+                {% for error in form.nickname.errors %}
+                    <span class="error">{{ error }}</span>
+                {% endfor %}
             </div>
             <div>
                 <label for="id_phone_number">전화번호:</label>
                 {{ form.phone_number }}
+                {% for error in form.phone_number.errors %}
+                    <span class="error">{{ error }}</span>
+                {% endfor %}
             </div>
             <div>
                 <label for="id_gender">성별:</label>
                 {{ form.gender }}
+                {% for error in form.gender.errors %}
+                    <span class="error">{{ error }}</span>
+                {% endfor %}
             </div>
             <div>
                 <label for="id_password1">비밀번호:</label>
@@ -139,8 +154,8 @@
                 {% endfor %}
             </div>
             <div>
-                <label for="file">본인 인증을 위해 학생증 사진 첨부 필수:</label>
-                <input type="file" name="file" id="file" required>
+                <label for="id_student_id_file">본인 인증을 위해 학생증 사진 첨부 필수:</label>
+                <input type="file" name="student_id_file" id="id_student_id_file" required>
             </div>
             <div class="terms">
                 <input type="checkbox" name="agree" required>

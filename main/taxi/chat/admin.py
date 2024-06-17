@@ -5,7 +5,7 @@ from .models import ChatRoom, ChatMessage
 
 class CustomUserAdmin(UserAdmin):
     model = CustomUser
-    list_display = ('student_id', 'name', 'phone_number', 'gender', 'is_verified', 'is_staff','nickname')
+    list_display = ('student_id', 'name', 'date_joined', 'phone_number', 'gender', 'is_verified', 'is_staff','nickname','student_id_file')
     list_filter = ('is_staff', 'is_superuser', 'is_active', 'is_verified')
     fieldsets = (
         (None, {'fields': ('student_id', 'password')}),

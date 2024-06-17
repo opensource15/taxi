@@ -130,6 +130,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # 미디어 파일이 저장될 실제 파일 시스템 경로
 MEDIA_URL = '/media/'  # 미디어 파일에 접근하기 위한 URL
 
+
 FILE_UPLOAD_HANDLERS = [
     'django.core.files.uploadhandler.MemoryFileUploadHandler',
     'django.core.files.uploadhandler.TemporaryFileUploadHandler',
@@ -140,3 +141,5 @@ LOGIN_REDIRECT_URL = '/'  # 로그인 성공 후 리디렉션될 URL
 LOGOUT_REDIRECT_URL = '/login/'  # 로그아웃 후 리디렉션될 URL
 
 TIME_ZONE = 'Asia/Seoul'
+
+BASE_DIR = Path(__file__).resolve().parent.parent
